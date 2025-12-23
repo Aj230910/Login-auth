@@ -48,10 +48,11 @@ router.get(
     const token = generateAccessToken(req.user);
 
     res.redirect(
-      `http://localhost:5173/dashboard?token=${token}`
+      `https://profile-peach-xi.vercel.app/dashboard?token=${token}`
     );
   }
 );
+
 
 /* ================= GET PROFILE ================= */
 router.get("/profile", authMiddleware, async (req, res) => {
