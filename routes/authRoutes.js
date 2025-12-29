@@ -30,7 +30,7 @@ router.post("/login", async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(400).json({ msg: "Wrong password" });
 
-  const accessToken = generateAccessToken({ _id: user._id });
+  const accessToken = generateAccessToken(user);
   res.json({ accessToken });
 });
 
@@ -45,23 +45,14 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    if (!req.user) {
-      return res.status(500).send("Google authentication failed");
-    }
-
-    if (!process.env.FRONTEND_URL) {
-      return res.status(500).send("FRONTEND_URL not set");
-    }
-
-    const token = generateAccessToken({
-      _id: req.user._id,
-    });
+    const token = generateAccessToken(req.user);
 
     res.redirect(
-      `${process.env.FRONTEND_URL}/dashboard?token=${token}`
+      `https://profile-peach-xi.vercel.app/dashboard?token=${token}`
     );
   }
 );
+
 
 /* ================= GET PROFILE ================= */
 router.get("/profile", authMiddleware, async (req, res) => {
@@ -69,7 +60,7 @@ router.get("/profile", authMiddleware, async (req, res) => {
   res.json(user);
 });
 
-/* ================= EDIT PROFILE ================= */
+/* ================= EDIT PROFILE (NEW) ================= */
 router.patch("/profile", authMiddleware, async (req, res) => {
   try {
     const { name } = req.body;
