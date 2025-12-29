@@ -48,10 +48,11 @@ router.get(
     const token = generateAccessToken(req.user);
 
     res.redirect(
-      `https://profile-peach-xi.vercel.app/dashboard?token=${token}`
+      `${process.env.FRONTEND_URL}/dashboard?token=${token}`
     );
   }
 );
+
 
 
 /* ================= GET PROFILE ================= */
