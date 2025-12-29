@@ -30,7 +30,7 @@ router.post("/login", async (req, res) => {
   const match = await bcrypt.compare(password, user.password);
   if (!match) return res.status(400).json({ msg: "Wrong password" });
 
-  const accessToken = generateAccessToken(user);
+  const accessToken = generateAccessToken({ _id: user._id });
   res.json({ accessToken });
 });
 
@@ -45,7 +45,17 @@ router.get(
   "/google/callback",
   passport.authenticate("google", { session: false }),
   (req, res) => {
-    const token = generateAccessToken(req.user);
+    if (!req.user) {
+      return res.status(500).send("Google authentication failed");
+    }
+
+    if (!process.env.FRONTEND_URL) {
+      return res.status(500).send("FRONTEND_URL not set");
+    }
+
+    const token = generateAccessToken({
+      _id: req.user._id,
+    });
 
     res.redirect(
       `${process.env.FRONTEND_URL}/dashboard?token=${token}`
@@ -53,15 +63,13 @@ router.get(
   }
 );
 
-
-
 /* ================= GET PROFILE ================= */
 router.get("/profile", authMiddleware, async (req, res) => {
   const user = await User.findById(req.userId).select("-password");
   res.json(user);
 });
 
-/* ================= EDIT PROFILE (NEW) ================= */
+/* ================= EDIT PROFILE ================= */
 router.patch("/profile", authMiddleware, async (req, res) => {
   try {
     const { name } = req.body;
